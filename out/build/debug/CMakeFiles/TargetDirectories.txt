@@ -1,0 +1,4 @@
+C:/MyErunda/diagramscene/out/build/debug/CMakeFiles/DiagramScene.dir
+C:/MyErunda/diagramscene/out/build/debug/CMakeFiles/edit_cache.dir
+C:/MyErunda/diagramscene/out/build/debug/CMakeFiles/rebuild_cache.dir
+C:/MyErunda/diagramscene/out/build/debug/CMakeFiles/DiagramScene_autogen.dir

@@ -1,0 +1,32 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "cmake configure",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-B",
+                "build",
+                "-S",
+                ".",
+                "-G",
+                "MinGW Makefiles",
+                "-DCMAKE_PREFIX_PATH=C:/Qt/Qt5.14.2/5.14.2/mingw73_32"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "cmake build",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "build"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        }
+    ]
+}
