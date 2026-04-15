@@ -1,0 +1,10 @@
+^C:\MYERUNDA\DAG\BUILD\CMAKEFILES\CCD3EE408680A193A109F6136EBBA33C\GENERATE.STAMP.RULE
+setlocal
+C:\CMake\bin\cmake.exe -SC:/MyErunda/DAG -BC:/MyErunda/DAG/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/MyErunda/DAG/build/DAG.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

@@ -16,8 +16,7 @@
 #include <QMessageBox>
 #include <QHBoxLayout>
 
-// ==================== КОНСТРУКТОР ====================
-
+// конструктор
 VisualNode::VisualNode(int id, NodeType type, QGraphicsItem* parent)
     : QGraphicsEllipseItem(parent), nodeId(id), nodeType(type),
       calculated(false), value(0), outputDialogOpen(false)
@@ -50,7 +49,6 @@ VisualNode::VisualNode(int id, NodeType type, QGraphicsItem* parent)
     setPen(QPen(Qt::black, 2));
 }
 
-// ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
 
 QString VisualNode::normalizeDataString(const QString& data) const {
     QString result = data;
@@ -86,8 +84,6 @@ bool VisualNode::validateNumberData(const QString& data) {
     }
     return true;
 }
-
-// ==================== УПРАВЛЕНИЕ ДАННЫМИ ====================
 
 void VisualNode::setInputData(const QString& data) {
     inputData = data;
@@ -148,7 +144,6 @@ void VisualNode::showOutputDialog() {
     dialog->show();
 }
 
-// ==================== УПРАВЛЕНИЕ СТРЕЛКАМИ ====================
 
 void VisualNode::addArrow(Arrow* arrow) {
     if (!arrows.contains(arrow)) arrows.append(arrow);
@@ -167,8 +162,6 @@ void VisualNode::removeArrows() {
     }
     arrows.clear();
 }
-
-// ==================== ПРОВЕРКА СОВМЕСТИМОСТИ ====================
 
 bool VisualNode::isCompatibleWith(VisualNode* other) const {
     if (!other) return false;
@@ -201,8 +194,6 @@ bool VisualNode::isCompatibleWith(VisualNode* other) const {
 
     return dataType == other->dataType;
 }
-
-// ==================== ОБРАБОТЧИКИ СОБЫТИЙ ====================
 
 void VisualNode::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
     if (nodeType == NodeType::INPUT) {

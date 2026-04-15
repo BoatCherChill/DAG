@@ -21,7 +21,7 @@ bool Graph::hasCycle(int v, vector<bool>& visited, vector<bool>& recStack) const
     visited[v] = true;                                   // Отмечаем вершину как посещенную
     recStack[v] = true;                                  // Добавляем в стек рекурсии
     vector<vector<int>> adj = adjacencyMatrix();
-    for (int to = 0; to < adj[v].size(); to++) {
+    for (size_t to = 0; to < adj[v].size(); to++) {
         if (adj[v][to]) {                                // Если есть ребро v -> to
             if (!visited[to] && hasCycle(to, visited, recStack)) return true;
             else if (recStack[to]) return true;          // Вершина уже в стеке - цикл

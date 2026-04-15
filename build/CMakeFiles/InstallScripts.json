@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/MyErunda/DAG/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

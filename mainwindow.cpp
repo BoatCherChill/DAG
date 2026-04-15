@@ -1,3 +1,4 @@
+
 #include "mainwindow.h"
 #include "diagramscene.h"
 #include "visualnode.h"
@@ -6,17 +7,16 @@
 #include <QButtonGroup>
 #include <QToolButton>
 
-// ==================== КОНСТРУКТОРЫ И ДЕСТРУКТОРЫ ====================
-
+// конструктор окна приложения
 MainWindow::MainWindow() {
-    setupUI();           // Настройка пользовательского интерфейса
-    createToolbar();     // Создание панели инструментов
-    setWindowTitle("Ациклические направленные графы");  // Установка заголовка окна
-    resize(1000, 700);   // Установка начального размера окна
+    setupUI();
+    createToolbar();
+    setWindowTitle("Ациклические направленные графы");
+    resize(1000, 700);
 }
 
+// деструктор окна приложения
 MainWindow::~MainWindow() {
-    // Получаем список всех верхнеуровневых виджетов и закрываем их
     QList<QWidget*> topWidgets = QApplication::topLevelWidgets();
     for (QWidget* widget : topWidgets) {
         if (widget != this && widget->isVisible()) {
@@ -25,130 +25,122 @@ MainWindow::~MainWindow() {
     }
 }
 
-// ==================== НАСТРОЙКА ИНТЕРФЕЙСА ====================
-
+// функция настройки интерфейса
 void MainWindow::setupUI() {
-    QMenu* itemMenu = new QMenu(this);                     // Создание контекстного меню для узлов
-    scene = new DiagramScene(itemMenu, this);              // Создание графической сцены
-    scene->setSceneRect(-5000, -5000, 10000, 10000);       // Установка границ сцены (большое поле)
-    scene->setBackgroundBrush(Qt::white);                  // Установка белого фона сцены
-    scene->setMode(DiagramScene::InsertNode);                // Установка начального режима - перемещение
+    QMenu* itemMenu = new QMenu(this);
+    scene = new DiagramScene(itemMenu, this);
+    scene->setSceneRect(-5000, -5000, 10000, 10000);
+    scene->setBackgroundBrush(Qt::white);
+    scene->setMode(DiagramScene::InsertNode);
 
     QObject::connect(scene, &DiagramScene::itemInserted, this, &MainWindow::addNode);
     QObject::connect(scene, &DiagramScene::arrowCreated, this, &MainWindow::onArrowCreated);
-    view = new QGraphicsView(scene, this);                 // Создание графического представления
-    view->setRenderHint(QPainter::Antialiasing);           // Включение сглаживания
+    view = new QGraphicsView(scene, this);
+    view->setRenderHint(QPainter::Antialiasing);
     view->setDragMode(QGraphicsView::NoDrag);
-    view->setContextMenuPolicy(Qt::CustomContextMenu);     // Включение пользовательского контекстного меню
+    view->setContextMenuPolicy(Qt::CustomContextMenu);
     QObject::connect(view, &QGraphicsView::customContextMenuRequested, this, &MainWindow::showContextMenu);
-    setCentralWidget(view);                                // Установка представления как центрального виджета
+    setCentralWidget(view);
 }
 
 void MainWindow::createToolbar() {
-    QToolBar* bar = addToolBar("");                        // Создание панели инструментов без названия
-    bar->setContextMenuPolicy(Qt::PreventContextMenu);     // Запрет на скрытие панели через контекстное меню
+    QToolBar* bar = addToolBar("");
+    bar->setContextMenuPolicy(Qt::PreventContextMenu);
 
-    QAction* deleteAction = bar->addAction("Удалить");     // Создание кнопки "Удалить"
-    QObject::connect(deleteAction, &QAction::triggered, this, &MainWindow::deleteItem); // Подключение удаления
+    QAction* deleteAction = bar->addAction("Удалить");
+    QObject::connect(deleteAction, &QAction::triggered, this, &MainWindow::deleteItem);
 
-    bar->addSeparator();                                   // Разделитель
+    bar->addSeparator();
 
-    QButtonGroup* modeGroup = new QButtonGroup(this);      // Группа для кнопок режимов
-    modeGroup->setExclusive(true);                         // Только одна кнопка может быть нажата
+    QButtonGroup* modeGroup = new QButtonGroup(this);
+    modeGroup->setExclusive(true);
 
-    node_button = new QToolButton;                           // Кнопка "Выбрать"
+    node_button = new QToolButton;
     node_button->setText("Узлы");
-    node_button->setCheckable(true);                         // С возможностью нажатия
-    node_button->setChecked(true);                           // Нажата по умолчанию
+    node_button->setCheckable(true);
+    node_button->setChecked(true);
 
-    arrow_button = new QToolButton;                            // Кнопка "Связи"
+    arrow_button = new QToolButton;
     arrow_button->setText("Связи");
-    arrow_button->setCheckable(true);                          // С возможностью нажатия
+    arrow_button->setCheckable(true);
 
-    modeGroup->addButton(node_button, 0);                    // Добавление в группу
-    modeGroup->addButton(arrow_button, 1);                     // Добавление в группу
+    modeGroup->addButton(node_button, 0);
+    modeGroup->addButton(arrow_button, 1);
 
-    bar->addWidget(node_button);                             // Добавление на панель
-    bar->addWidget(arrow_button);                              // Добавление на панель
+    bar->addWidget(node_button);
+    bar->addWidget(arrow_button);
 
-    // Обработчик для кнопки "Выбрать" - режим перемещения узлов
     QObject::connect(node_button, &QToolButton::clicked, [this]() {
-        scene->setMode(DiagramScene::InsertNode);            // Установка режима перемещения
-        for (QGraphicsItem* item : scene->items()) {       // Перебор всех элементов сцены
+        scene->setMode(DiagramScene::InsertNode);
+        for (QGraphicsItem* item : scene->items()) {
             if (VisualNode* node = qgraphicsitem_cast<VisualNode*>(item)) {
-                node->setFlag(QGraphicsItem::ItemIsMovable, true); // Включение перемещения узлов
+                node->setFlag(QGraphicsItem::ItemIsMovable, true);
             }
         }
-        view->setCursor(Qt::ArrowCursor);                  // Установка курсора-стрелки
+        view->setCursor(Qt::ArrowCursor);
     });
 
-    // Обработчик для кнопки "Связи" - режим создания связей
     QObject::connect(arrow_button, &QToolButton::clicked, [this]() {
-        scene->setMode(DiagramScene::InsertLine);          // Установка режима рисования связей
-        for (QGraphicsItem* item : scene->items()) {       // Перебор всех элементов сцены
+        scene->setMode(DiagramScene::InsertLine);
+        for (QGraphicsItem* item : scene->items()) {
             if (VisualNode* node = qgraphicsitem_cast<VisualNode*>(item)) {
-                node->setFlag(QGraphicsItem::ItemIsMovable, false); // Отключение перемещения узлов
+                node->setFlag(QGraphicsItem::ItemIsMovable, false);
             }
         }
-        view->setCursor(Qt::CrossCursor);                  // Установка курсора-крестика
+        view->setCursor(Qt::CrossCursor);
     });
 
-    bar->addSeparator();                                   // Разделитель
-
+    bar->addSeparator();
 
     QPushButton* execBtn = new QPushButton("Выполнить");
-    execBtn->setObjectName("executeButton");  // Даём имя для поиска
-        execBtn->setEnabled(false);  // Изначально неактивна
-        bar->addWidget(execBtn);
-        QObject::connect(execBtn, &QPushButton::clicked, this, &MainWindow::executeGraph);
-        // Кнопка "Инструкция"
-            QAction* instructionsAction = bar->addAction("Инструкция");
-            QObject::connect(instructionsAction, &QAction::triggered, this, &MainWindow::showInstruction);
+    execBtn->setObjectName("executeButton");
+    execBtn->setEnabled(false);
+    bar->addWidget(execBtn);
+    QObject::connect(execBtn, &QPushButton::clicked, this, &MainWindow::executeGraph);
 
-            bar->addSeparator();
+    QAction* instructionsAction = bar->addAction("Инструкция");
+    QObject::connect(instructionsAction, &QAction::triggered, this, &MainWindow::showInstruction);
+
+    bar->addSeparator();
 }
 
-// ==================== КОНТЕКСТНОЕ МЕНЮ И СОЗДАНИЕ УЗЛОВ ====================
-
 void MainWindow::showContextMenu(const QPoint& pos) {
-    if (scene->getMode() == DiagramScene::InsertLine) return; // В режиме связей контекстное меню недоступно
-    if (scene->itemAt(view->mapToScene(pos), QTransform())) return; // Если клик на узле - не показываем меню
+    if (scene->getMode() == DiagramScene::InsertLine) return;
+    if (scene->itemAt(view->mapToScene(pos), QTransform())) return;
 
-    menu_pos = view->mapToScene(pos);                    // Сохраняем позицию для создания узла
-    QMenu menu;                                            // Создание контекстного меню
-    QMenu* ioMenu = menu.addMenu("Ввод/Вывод");            // Подменю ввода/вывода
-    ioMenu->addAction("Ввод", [this]() { createNode(NodeType::INPUT); });     // Создание узла ввода
-    ioMenu->addAction("Вывод", [this]() { createNode(NodeType::OUTPUT); });   // Создание узла вывода
-    QMenu* numMenu = menu.addMenu("Для чисел");            // Подменю числовых операций
-    numMenu->addAction("Сумма", [this]() { createNode(NodeType::SUM); });       // Создание узла суммы
-    numMenu->addAction("Медиана", [this]() { createNode(NodeType::MEDIAN); });  // Создание узла медианы
-    numMenu->addAction("Среднее", [this]() { createNode(NodeType::AVERAGE); }); // Создание узла среднего
-    QMenu* txtMenu = menu.addMenu("Для текста");           // Подменю текстовых операций
-    txtMenu->addAction("Верхний регистр", [this]() { createNode(NodeType::TO_UPPER); }); // Создание узла верхнего регистра
-    txtMenu->addAction("Нижний регистр", [this]() { createNode(NodeType::TO_LOWER); }); // Создание узла нижнего регистра
-    menu.exec(view->viewport()->mapToGlobal(pos));         // Отображение меню
+    menu_pos = view->mapToScene(pos);
+    QMenu menu;
+    QMenu* ioMenu = menu.addMenu("Ввод/Вывод");
+    ioMenu->addAction("Ввод", [this]() { createNode(NodeType::INPUT); });
+    ioMenu->addAction("Вывод", [this]() { createNode(NodeType::OUTPUT); });
+    QMenu* numMenu = menu.addMenu("Для чисел");
+    numMenu->addAction("Сумма", [this]() { createNode(NodeType::SUM); });
+    numMenu->addAction("Медиана", [this]() { createNode(NodeType::MEDIAN); });
+    numMenu->addAction("Среднее", [this]() { createNode(NodeType::AVERAGE); });
+    QMenu* txtMenu = menu.addMenu("Для текста");
+    txtMenu->addAction("Верхний регистр", [this]() { createNode(NodeType::TO_UPPER); });
+    txtMenu->addAction("Нижний регистр", [this]() { createNode(NodeType::TO_LOWER); });
+    menu.exec(view->viewport()->mapToGlobal(pos));
 }
 
 void MainWindow::createNode(NodeType type) {
-    int id = graph.getNextId();                            // Получение следующего ID для узла
-    VisualNode* node = new VisualNode(id, type);           // Создание визуального узла
-    node->setPos(menu_pos);                              // Установка позиции в месте клика
-    node->setFlag(QGraphicsItem::ItemIsMovable, true);     // Узел можно перемещать
-    scene->addItem(node);                                  // Добавление узла на сцену
-    addNode(node);                                      // Добавление узла в логический граф
+    int id = graph.getNextId();
+    VisualNode* node = new VisualNode(id, type);
+    node->setPos(menu_pos);
+    node->setFlag(QGraphicsItem::ItemIsMovable, true);
+    scene->addItem(node);
+    addNode(node);
     updateExecuteButton();
 }
 
-// ==================== УПРАВЛЕНИЕ ГРАФОМ ====================
-
 void MainWindow::addNode(VisualNode* node) {
-    graph.addNode(node->pos().x(), node->pos().y(), node->getNodeType()); // Добавление узла в логический граф
-    Node* graphNode = graph.findNodeById(graph.getNextId() - 1);          // Поиск добавленного узла
+    graph.addNode(node->pos().x(), node->pos().y(), node->getNodeType());
+    Node* graphNode = graph.findNodeById(graph.getNextId() - 1);
     if (graphNode) {
-        node->setNodeId(graphNode->nodeID);                // Сохранение ID в визуальном узле
+        node->setNodeId(graphNode->nodeID);
         idToNode[graphNode->nodeID] = node;
         if (node->getNodeType() == NodeType::INPUT && !node->getInputData().isEmpty()) {
-            graphNode->result = node->getInputData().toStdString(); // Сохранение данных ввода
+            graphNode->result = node->getInputData().toStdString();
             graphNode->calculated = true;
         }
     }
@@ -162,65 +154,61 @@ void MainWindow::removeNode(VisualNode* node) {
 }
 
 void MainWindow::addConnection(Arrow* arrow) {
-    int fromId = arrow->startItem()->getNodeId();    // ← ID начального узла
-    int toId = arrow->endItem()->getNodeId();        // ← ID конечного узла
-    graph.addRelation(fromId, toId);                 // Добавление связи в логический граф
-    arrowToIds[arrow] = qMakePair(fromId, toId);     // Сохранение связи для возможного удаления
-    arrow->setZValue(-1000);                         // Стрелка под узлами
+    int fromId = arrow->startItem()->getNodeId();
+    int toId = arrow->endItem()->getNodeId();
+    graph.addRelation(fromId, toId);
+    arrowToIds[arrow] = qMakePair(fromId, toId);
+    arrow->setZValue(-1000);
 }
 
 void MainWindow::removeConnection(Arrow* arrow) {
     if (!arrowToIds.contains(arrow))
-        return;               // Если связи нет - выход
-    auto conn = arrowToIds[arrow];                         // Получение ID узлов связи
-    graph.deleteRelation(conn.first, conn.second);         // Удаление связи из логического графа
-    arrowToIds.remove(arrow);                              // Удаление из маппинга
+        return;
+    auto conn = arrowToIds[arrow];
+    graph.deleteRelation(conn.first, conn.second);
+    arrowToIds.remove(arrow);
 }
 
 void MainWindow::onArrowCreated(Arrow* arrow) {
-    arrow->setZValue(-1000);                               // Стрелка под узлами
-    addConnection(arrow);                                  // Добавление связи в граф
-    if (!graph.isDAG()) {                               // Проверка на циклы
-        QMessageBox::warning(this, "Ошибка", "Эта связь создаст цикл в графе!"); // Сообщение об ошибке
-        removeConnection(arrow);                           // Удаление связи
-        arrow->startItem()->removeArrow(arrow);            // Удаление из начального узла
-        arrow->endItem()->removeArrow(arrow);              // Удаление из конечного узла
-        scene->removeItem(arrow);                          // Удаление со сцены
-        delete arrow;                                      // Уничтожение стрелки
+    arrow->setZValue(-1000);
+    addConnection(arrow);
+    if (!graph.isDAG()) {
+        QMessageBox::warning(this, "Ошибка", "Эта связь создаст цикл в графе!");
+        removeConnection(arrow);
+        arrow->startItem()->removeArrow(arrow);
+        arrow->endItem()->removeArrow(arrow);
+        scene->removeItem(arrow);
+        delete arrow;
     }
     updateExecuteButton();
 }
 
-
-// ==================== УДАЛЕНИЕ ЭЛЕМЕНТОВ ====================
 void MainWindow::deleteItem() {
-    QList<QGraphicsItem*> selected = scene->selectedItems(); // Получение выделенных элементов
+    QList<QGraphicsItem*> selected = scene->selectedItems();
     for (QGraphicsItem* item : selected) {
-        if (Arrow* arrow = qgraphicsitem_cast<Arrow*>(item)) { // Если выделена стрелка
-            removeConnection(arrow);                       // Удаление связи из графа
+        if (Arrow* arrow = qgraphicsitem_cast<Arrow*>(item)) {
+            removeConnection(arrow);
             if (arrow->startItem())
-                arrow->startItem()->removeArrow(arrow); // Удаление из начального узла
+                arrow->startItem()->removeArrow(arrow);
             if (arrow->endItem())
-                arrow->endItem()->removeArrow(arrow);     // Удаление из конечного узла
-            scene->removeItem(arrow);                      // Удаление со сцены
-            delete arrow;                                  // Уничтожение стрелки
-        } else if (VisualNode* node = qgraphicsitem_cast<VisualNode*>(item)) { // Если выделен узел
-            for (Arrow* arrow : node->getArrows()) {       // Перебор всех стрелок узла
-                removeConnection(arrow);                   // Удаление связи из графа
-                scene->removeItem(arrow);                  // Удаление со сцены
-                delete arrow;                              // Уничтожение стрелки
+                arrow->endItem()->removeArrow(arrow);
+            scene->removeItem(arrow);
+            delete arrow;
+        } else if (VisualNode* node = qgraphicsitem_cast<VisualNode*>(item)) {
+            for (Arrow* arrow : node->getArrows()) {
+                removeConnection(arrow);
+                scene->removeItem(arrow);
+                delete arrow;
             }
-            removeNode(node);                         // Удаление узла из графа
-            scene->removeItem(node);                       // Удаление со сцены
-            delete node;                                   // Уничтожение узла
+            removeNode(node);
+            scene->removeItem(node);
+            delete node;
         }
     }
     updateExecuteButton();
 }
 
-
 void MainWindow::executeGraph() {
-    // Синхронизация: добавление всех узлов и стрелок в логический граф
     for (QGraphicsItem* item : scene->items()) {
         if (VisualNode* node = qgraphicsitem_cast<VisualNode*>(item)) {
             if (!graph.findNodeById(node->getNodeId())) addNode(node);
@@ -229,7 +217,6 @@ void MainWindow::executeGraph() {
         }
     }
 
-    // Сохранение данных всех входных узлов перед выполнением
     QMap<int, QString> savedInputData;
     for (auto it = idToNode.begin(); it != idToNode.end(); ++it) {
         VisualNode* visNode = it.value();
@@ -238,7 +225,6 @@ void MainWindow::executeGraph() {
         }
     }
 
-    // Передача данных из визуальных узлов в логический граф
     for (auto it = idToNode.begin(); it != idToNode.end(); ++it) {
         Node* graphNode = graph.findNodeById(it.key());
         VisualNode* visNode = it.value();
@@ -248,16 +234,14 @@ void MainWindow::executeGraph() {
         }
     }
 
-    // Очистка данных узлов вывода перед выполнением
     for (auto it = idToNode.begin(); it != idToNode.end(); ++it) {
         if (it.value()->getNodeType() == NodeType::OUTPUT) {
             it.value()->clearOutputData();
         }
     }
 
-    graph.execute();                                       // Выполнение логического графа
+    graph.execute();
 
-    // Восстановление данных входных узлов (они могли быть изменены при выполнении)
     for (auto it = savedInputData.begin(); it != savedInputData.end(); ++it) {
         Node* graphNode = graph.findNodeById(it.key());
         VisualNode* visNode = idToNode[it.key()];
@@ -268,13 +252,11 @@ void MainWindow::executeGraph() {
         }
     }
 
-    // Передача результатов из логического графа в визуальные узлы
     for (auto it = idToNode.begin(); it != idToNode.end(); ++it) {
         Node* graphNode = graph.findNodeById(it.key());
         VisualNode* visNode = it.value();
         if (graphNode && graphNode->calculated) {
             if (visNode->getNodeType() == NodeType::OUTPUT) {
-                // Для узлов вывода: каждый результат от отдельного источника добавляется отдельно
                 for (int prevId : graphNode->prev_nodes) {
                     Node* prev = graph.findNodeById(prevId);
                     if (prev && prev->calculated) {
@@ -282,25 +264,21 @@ void MainWindow::executeGraph() {
                     }
                 }
             } else if (visNode->getNodeType() != NodeType::INPUT) {
-                // Для остальных узлов: преобразование результата в число
                 double val = QString::fromStdString(graphNode->result).toDouble();
                 visNode->setResult(val);
             }
         }
     }
 
-    // Сброс режима в "Узлы" после выполнения
     scene->setMode(DiagramScene::InsertNode);
 
-    // Сброс состояния кнопок: включаем "Узлы", выключаем "Связи"
     if (node_button) {
-        node_button->setChecked(true);                       // Кнопка "Узлы" становится нажатой
+        node_button->setChecked(true);
     }
     if (arrow_button) {
-        arrow_button->setChecked(false);                       // Кнопка "Связи" становится отжатой
+        arrow_button->setChecked(false);
     }
 
-    // Включаем перемещение для всех узлов
     for (QGraphicsItem* item : scene->items()) {
         if (VisualNode* node = qgraphicsitem_cast<VisualNode*>(item)) {
             node->setFlag(QGraphicsItem::ItemIsMovable, true);
@@ -351,7 +329,6 @@ void MainWindow::showInstruction() {
     QByteArray data = file.readAll();
     file.close();
 
-    // Убираем BOM если есть
     if (data.size() >= 3 && data[0] == '\xEF' && data[1] == '\xBB' && data[2] == '\xBF') {
         data = data.mid(3);
     }
@@ -378,4 +355,3 @@ void MainWindow::showInstruction() {
 
     dialog->show();
 }
-

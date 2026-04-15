@@ -7,24 +7,22 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
 
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
 
 set(SOURCES
     main.cpp
     mainwindow.cpp
     graph.cpp
+    diagramscene.cpp
+    visualnode.cpp
     arrow.cpp
-    DiagramScene.cpp
-    VisualNode.cpp
 )
 
 set(HEADERS
     mainwindow.h
     graph.h
-    Arrow.h
-    DiagramScene.h
-    VisualNode.h
+    diagramscene.h
+    visualnode.h
+    arrow.h
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})

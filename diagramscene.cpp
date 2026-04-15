@@ -4,8 +4,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QMessageBox>
 
-// ==================== КОНСТРУКТОР ====================
-
+//конструктор сцены
 DiagramScene::DiagramScene(QMenu* itemMenu, QObject* parent)
     : QGraphicsScene(parent), my_menu(itemMenu) {}
 

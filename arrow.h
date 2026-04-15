@@ -20,5 +20,4 @@ private:
     VisualNode* current_start;
     VisualNode* current_end;
     QPolygonF arrow_head;
-    QColor my_color = Qt::black;
 };

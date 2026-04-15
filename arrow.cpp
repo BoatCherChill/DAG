@@ -7,7 +7,7 @@
 //конструктор стрелки
 Arrow::Arrow(VisualNode* start, VisualNode* end) : current_start(start), current_end(end) {
     setFlag(QGraphicsItem::ItemIsSelectable, true); // подключить выделение стрелки
-    setPen(QPen(my_color, 2));
+    setPen(QPen(Qt::black, 2));
     setZValue(-1000); // создавать стрелку под узлами
 }
 
@@ -23,10 +23,10 @@ QRectF Arrow::boundingRect() const {
 void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
     // нарисовать линию
     QPen myPen = pen();
-    myPen.setColor(my_color);
+    myPen.setColor(Qt::black);
 
     painter->setPen(myPen);
-    painter->setBrush(my_color);
+    painter->setBrush(Qt::black);
 
     QPointF start_position = current_start->pos();
     QPointF end_position = current_end->pos();
@@ -61,7 +61,7 @@ void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) 
 
     // Если стрелка выделена
     if (isSelected()) {
-        painter->setPen(QPen(my_color, 1, Qt::DashLine));
+        painter->setPen(QPen(Qt::black, 1, Qt::DashLine));
             painter->setBrush(Qt::NoBrush);
 
             QLineF lineUp(start_point, end_point);
