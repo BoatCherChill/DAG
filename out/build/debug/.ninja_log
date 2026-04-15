@@ -1,0 +1,14 @@
+# ninja log v6
+31	2925	7974321470312834	CMakeFiles/DiagramScene_autogen	e09b800ac56ed260
+31	2925	7974321470312834	DiagramScene_autogen/mocs_compilation.cpp	e09b800ac56ed260
+31	2925	7974321470312834	C:/MyErunda/diagramscene/out/build/debug/CMakeFiles/DiagramScene_autogen	e09b800ac56ed260
+31	2925	7974321470312834	C:/MyErunda/diagramscene/out/build/debug/DiagramScene_autogen/mocs_compilation.cpp	e09b800ac56ed260
+2986	7599	7974321499862970	CMakeFiles/DiagramScene.dir/graph.cpp.obj	8a3906c5a384ebd6
+3007	8029	7974321500073001	CMakeFiles/DiagramScene.dir/dag.cpp.obj	cac2db3218bc6f24
+3018	8224	7974321500182919	CMakeFiles/DiagramScene.dir/operations.cpp.obj	e6efcca48ab6fda0
+3045	8566	7974321500453072	CMakeFiles/DiagramScene.dir/diagramcontroller.cpp.obj	63d5b0b7a191ea42
+2937	8620	7974321499372923	CMakeFiles/DiagramScene.dir/main.cpp.obj	c8abd575c5427106
+2957	8783	7974321499572965	CMakeFiles/DiagramScene.dir/diagramscene.cpp.obj	91e6e5115df538a6
+2977	8805	7974321499772960	CMakeFiles/DiagramScene.dir/arrow.cpp.obj	ad4069df51b98fda
+2927	9648	7974321499272910	CMakeFiles/DiagramScene.dir/DiagramScene_autogen/mocs_compilation.cpp.obj	4b0df2c0d8a4166c
+2948	13670	7974321499482958	CMakeFiles/DiagramScene.dir/mainwindow.cpp.obj	b4ffb0fe385474f1
