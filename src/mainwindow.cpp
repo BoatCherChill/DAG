@@ -301,19 +301,8 @@ void MainWindow::updateExecuteButton() {
     QPushButton* execBtn = findChild<QPushButton*>("executeButton");
     if (!execBtn) return;
 
-    bool hasOutput = false;
-    bool hasConnectionToOutput = false;
+    // Кнопка активна, если есть хотя бы один узел
+    bool hasAnyNode = !idToNode.isEmpty();
 
-    for (QGraphicsItem* item : scene->items()) {
-        if (VisualNode* node = qgraphicsitem_cast<VisualNode*>(item)) {
-            if (node->getNodeType() == NodeType::OUTPUT) {
-                hasOutput = true;
-                if (!node->getArrows().isEmpty()) {
-                    hasConnectionToOutput = true;
-                }
-            }
-        }
-    }
-
-    execBtn->setEnabled(hasOutput && hasConnectionToOutput);
+    execBtn->setEnabled(hasAnyNode);
 }
