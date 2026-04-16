@@ -1,0 +1,3 @@
+C:\CMake\bin\cmake.exe -E rm -f CMakeFiles\DAG.dir/objects.a
+C:\Qt\Qt5.14.2\Tools\mingw1120_64\mingw64\bin\ar.exe qc CMakeFiles\DAG.dir/objects.a @CMakeFiles\DAG.dir\objects1.rsp
+C:\Qt\Qt5.14.2\Tools\mingw1120_64\mingw64\bin\g++.exe  -std=c++11 -Wl,--whole-archive CMakeFiles\DAG.dir/objects.a -Wl,--no-whole-archive -o DAG.exe -Wl,--out-implib,libDAG.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\DAG.dir\linkLibs.rsp
