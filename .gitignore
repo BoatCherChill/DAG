@@ -2,22 +2,31 @@
 *.user
 *.user.*
 CMakeLists.txt.user*
-*.autogen/
 *.creator
 *.files
 *.includes
 *.config
 
-# CMake
+# Qt временные файлы сборки (НЕ удаляем build, только временные файлы внутри)
+*_autogen/
+mocs_compilation.cpp
+*.moc
+*.o
+*.obj
+*.qrc.dep
+Makefile*
+*.pri.user
+*.pro.user
+
+# CMake временные файлы (НЕ удаляем build, только временные файлы)
 CMakeCache.txt
 CMakeUserPresets.json
 CMakePresets.json
 CMakeFiles/
 cmake_install.cmake
-Makefile
+CTestTestfile.cmake
 *.cmake
-
-
+!CMakeLists.txt
 
 # IDE
 .vs/
@@ -26,8 +35,9 @@ Makefile
 *.swp
 *.swo
 *~
+*.bak
 
-# Debug/Release папки
+# Debug/Release папки (если они отдельные)
 Debug/
 Release/
 *.Debug
@@ -37,3 +47,35 @@ Release/
 *.tmp
 *.log
 *.autosave
+*.stackdump
+
+# Windows системные
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# Компиляторы и линковщики (временные файлы)
+*.exp
+*.ilk
+*.pdb
+*.lib
+*.idb
+*.ipdb
+*.iobj
+*.ipch
+
+# Архивы (если случайно)
+*.zip
+*.7z
+*.rar
+*.tar
+*.gz
+
+# Документация (если генерируется)
+html/
+latex/
+*.qch
+
+# Пользовательские настройки Qt Creator
+*.config.qtc
+*.qws
