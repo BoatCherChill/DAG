@@ -12,11 +12,10 @@ enum class DataType { NUMBER, TEXT };
 
 class VisualNode : public QGraphicsEllipseItem {
 public:
-    enum { Type = UserType + 15 };
+    enum { Type = UserType + 15 }; // уникальный тип для qgraphicsitem_cast
 
     VisualNode(int id, NodeType type, QGraphicsItem* parent = nullptr); // конструктор узла (идентификатор, тип, родительский элемент)
 
-    // Геттеры
     int getNodeId() const { return nodeId; }
     void setNodeId(int id) { nodeId = id; }
     NodeType getNodeType() const { return nodeType; }
@@ -25,34 +24,30 @@ public:
     bool isCalculated() const { return calculated; }
     const QVector<Arrow*>& getArrows() const { return arrows; }
 
-    // Сеттеры
     void setInputData(const QString& data);
     void setResult(double val);
 
-    // Для OUTPUT узла
-    void addOutputData(const QString& data);
-    void clearOutputData();
-    void showOutputDialog();
+    void addOutputData(const QString& data); // добавить строку результата
+    void clearOutputData(); // очистить данные в узле
+    void showOutputDialog(); // показать узел с результатами
 
-    // Управление связями
-    void addArrow(Arrow* arrow);
-    void removeArrow(Arrow* arrow);
-    void removeArrows();
+    void addArrow(Arrow* arrow); // добавить стрелку
+    void removeArrow(Arrow* arrow); // удалить стрелку
+    void removeArrows(); // удалить все стрелки узла
 
-    // Проверка совместимости
-    bool isCompatibleWith(VisualNode* other) const;
+    bool isCompatibleWith(VisualNode* other) const; // функция проверки совместимости типов узлов
 
-    int type() const override { return Type; }
+    int type() const override { return Type; } // возврат типа для qgraphicsitem_cast
 
 protected:
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override; // функция обработки двойного нажатия мыши
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override; // функция отрисовки узла
+    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override; // функция изменения позиции узла
 
 private:
-    QString normalizeDataString(const QString& data) const;
-    QList<double> extractNumbers(const QString& data) const;
-    bool validateNumberData(const QString& data);
+    QString normalizeDataString(const QString& data) const; // функция нормализации строки
+    QList<double> extractNumbers(const QString& data) const; // функция извлечения чисел из строки
+    bool validateNumberData(const QString& data); // функция проверки на отсутсвие чего либо кроме чисел
 
     int nodeId;
     NodeType nodeType;

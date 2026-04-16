@@ -164,8 +164,10 @@ void VisualNode::removeArrows() {
 }
 
 bool VisualNode::isCompatibleWith(VisualNode* other) const {
-    if (!other) return false;
-    if (this == other) return false;
+    if (!other)
+        return false;
+    if (this == other)
+        return false;
 
     // OUTPUT может принимать данные от ЛЮБОГО узла
     if (nodeType == NodeType::OUTPUT)
@@ -181,11 +183,9 @@ bool VisualNode::isCompatibleWith(VisualNode* other) const {
     if (nodeType == NodeType::INPUT)
         return dataType == other->dataType;
 
-
     // Текстовые операции требуют текстовый вход
     if (nodeType == NodeType::TO_UPPER || nodeType == NodeType::TO_LOWER)
         return other->dataType == DataType::TEXT;
-
 
     // Числовые операции требуют числовой вход
     if (nodeType == NodeType::SUM || nodeType == NodeType::MEDIAN || nodeType == NodeType::AVERAGE)
@@ -194,6 +194,7 @@ bool VisualNode::isCompatibleWith(VisualNode* other) const {
 
     return dataType == other->dataType;
 }
+
 
 void VisualNode::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
     if (nodeType == NodeType::INPUT) {
@@ -208,7 +209,12 @@ void VisualNode::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
         QComboBox* typeCombo = new QComboBox();
         typeCombo->addItem("Числовой");
         typeCombo->addItem("Текстовый");
-        typeCombo->setCurrentIndex(dataType == DataType::TEXT ? 1 : 0);
+
+        if (dataType == DataType::TEXT)
+            typeCombo->setCurrentIndex(1);
+        else
+            typeCombo->setCurrentIndex(0);
+
         layout->addWidget(typeCombo);
 
         QLabel* label = new QLabel("Введите данные:");
@@ -225,91 +231,45 @@ void VisualNode::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
         QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
         layout->addWidget(buttonBox);
 
-        QLabel* errorLabel = new QLabel();
-        errorLabel->setStyleSheet("color: red; font-size: 10px;");
-        errorLabel->setWordWrap(true);
-        errorLabel->hide();
-        layout->addWidget(errorLabel);
-
-        bool dataValid = true;
+        DataType currentDataType = dataType;
 
         QObject::connect(typeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            [this, edit, errorLabel, &dataValid](int index) {
-                DataType newType = index == 1 ? DataType::TEXT : DataType::NUMBER;
-                dataType = newType;
-
-                QString errorMsg;
-                if (newType == DataType::NUMBER) {
-                    if (!validateNumberData(edit->toPlainText())) {
-                        errorLabel->setText(errorMsg);
-                        errorLabel->show();
-                        dataValid = false;
-                    } else {
-                        errorLabel->hide();
-                        dataValid = true;
-                    }
-                } else {
-                    errorLabel->hide();
-                    dataValid = true;
-                }
+            [&currentDataType](int index) {
+                if (index == 1)
+                    currentDataType = DataType::TEXT;
+                else
+                    currentDataType = DataType::NUMBER;
             });
-
-        auto validateAndShowError = [this, edit, errorLabel, &dataValid]() {
-            QString errorMsg;
-            if (dataType == DataType::NUMBER) {
-                if (validateNumberData(edit->toPlainText())) {
-                    errorLabel->hide();
-                    dataValid = true;
-                } else {
-                    errorLabel->setText(errorMsg);
-                    errorLabel->show();
-                    dataValid = false;
-                }
-            } else {
-                errorLabel->hide();
-                dataValid = true;
-            }
-        };
-
-        QObject::connect(edit, &QTextEdit::textChanged, [validateAndShowError]() {
-            validateAndShowError();
-        });
 
         QObject::connect(fileButton, &QPushButton::clicked, [edit]() {
             QString fileName = QFileDialog::getOpenFileName(nullptr, "Выберите файл", "", "*.txt");
-            if (fileName.isEmpty())
-                return;
-
+            if (fileName.isEmpty()) return;
             if (!fileName.endsWith(".txt", Qt::CaseInsensitive)) {
                 QMessageBox::warning(nullptr, "Ошибка", "Только .txt файлы!");
                 return;
             }
-
             QFile file(fileName);
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
                 QMessageBox::warning(nullptr, "Ошибка", "Не удалось открыть файл!");
                 return;
             }
-
             QByteArray data = file.readAll();
             file.close();
-
             if (data.isEmpty()) {
                 QMessageBox::warning(nullptr, "Ошибка", "Файл пуст!");
                 return;
             }
-
-
             edit->setPlainText(QString::fromUtf8(data));
         });
 
-        validateAndShowError();
-
-        QObject::connect(buttonBox, &QDialogButtonBox::accepted, [this, edit, &dialog, &dataValid]() {
-            if (!dataValid) {
-                QMessageBox::warning(&dialog, "Ошибка ввода", "Данные не соответствуют типу узла");
-                return;
+        QObject::connect(buttonBox, &QDialogButtonBox::accepted, [this, edit, &dialog, &currentDataType]() {
+            if (currentDataType == DataType::NUMBER) {
+                if (!validateNumberData(edit->toPlainText())) {
+                    QMessageBox::warning(&dialog, "Ошибка ввода", "Данные не соответствуют числовому типу!\nВведите числа через пробел.");
+                    return;
+                }
             }
+            dataType = currentDataType;
             setInputData(edit->toPlainText());
             dialog.accept();
         });
@@ -328,13 +288,27 @@ void VisualNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
 
     QString title;
     switch(nodeType) {
-        case NodeType::INPUT: title = "IN"; break;
-        case NodeType::OUTPUT: title = "OUT"; break;
-        case NodeType::SUM: title = "SUM"; break;
-        case NodeType::MEDIAN: title = "MED"; break;
-        case NodeType::AVERAGE: title = "AVG"; break;
-        case NodeType::TO_UPPER: title = "UP"; break;
-        case NodeType::TO_LOWER: title = "LOW"; break;
+        case NodeType::INPUT:
+            title = "IN";
+            break;
+        case NodeType::OUTPUT:
+            title = "OUT";
+            break;
+        case NodeType::SUM:
+            title = "SUM";
+            break;
+        case NodeType::MEDIAN:
+            title = "MED";
+            break;
+        case NodeType::AVERAGE:
+            title = "AVG";
+            break;
+        case NodeType::TO_UPPER:
+            title = "UP";
+            break;
+        case NodeType::TO_LOWER:
+            title = "LOW";
+            break;
     }
 
     if (nodeType == NodeType::INPUT) {
@@ -342,7 +316,13 @@ void VisualNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
             smallFont.setPointSize(7);
             painter->setFont(smallFont);
 
-            QString typeText = (dataType == DataType::NUMBER) ? "NUM" : "TEXT";
+
+            QString typeText;
+            if (dataType == DataType::NUMBER)
+                typeText = "NUM";
+            else
+                typeText = "TEXT";
+
             painter->drawText(rect().adjusted(0, 25, 0, 0), Qt::AlignCenter, typeText);
         }
 

@@ -81,7 +81,7 @@ void MainWindow::createToolbar() {
     });
 
     QObject::connect(arrow_button, &QToolButton::clicked, [this]() {
-        scene->setMode(DiagramScene::InsertLine);
+        scene->setMode(DiagramScene::InsertArrow);
         for (QGraphicsItem* item : scene->items()) {
             if (VisualNode* node = qgraphicsitem_cast<VisualNode*>(item)) {
                 node->setFlag(QGraphicsItem::ItemIsMovable, false);
@@ -98,14 +98,11 @@ void MainWindow::createToolbar() {
     bar->addWidget(execBtn);
     QObject::connect(execBtn, &QPushButton::clicked, this, &MainWindow::executeGraph);
 
-    QAction* instructionsAction = bar->addAction("Инструкция");
-    QObject::connect(instructionsAction, &QAction::triggered, this, &MainWindow::showInstruction);
-
     bar->addSeparator();
 }
 
 void MainWindow::showContextMenu(const QPoint& pos) {
-    if (scene->getMode() == DiagramScene::InsertLine) return;
+    if (scene->getMode() == DiagramScene::InsertArrow) return;
     if (scene->itemAt(view->mapToScene(pos), QTransform())) return;
 
     menu_pos = view->mapToScene(pos);
@@ -123,6 +120,7 @@ void MainWindow::showContextMenu(const QPoint& pos) {
     menu.exec(view->viewport()->mapToGlobal(pos));
 }
 
+// функция создания узла на сцене
 void MainWindow::createNode(NodeType type) {
     int id = graph.getNextId();
     VisualNode* node = new VisualNode(id, type);
@@ -133,6 +131,7 @@ void MainWindow::createNode(NodeType type) {
     updateExecuteButton();
 }
 
+// функция добавления узла в логический граф
 void MainWindow::addNode(VisualNode* node) {
     graph.addNode(node->pos().x(), node->pos().y(), node->getNodeType());
     Node* graphNode = graph.findNodeById(graph.getNextId() - 1);
@@ -146,6 +145,7 @@ void MainWindow::addNode(VisualNode* node) {
     }
 }
 
+// функция удаления узла из логического графа
 void MainWindow::removeNode(VisualNode* node) {
     if (!node->getNodeId())
             return;
@@ -153,7 +153,8 @@ void MainWindow::removeNode(VisualNode* node) {
     idToNode.remove(node->getNodeId());
 }
 
-void MainWindow::addConnection(Arrow* arrow) {
+// функция добавления стрелки в логический граф
+void MainWindow::addArrow(Arrow* arrow) {
     int fromId = arrow->startItem()->getNodeId();
     int toId = arrow->endItem()->getNodeId();
     graph.addRelation(fromId, toId);
@@ -161,7 +162,8 @@ void MainWindow::addConnection(Arrow* arrow) {
     arrow->setZValue(-1000);
 }
 
-void MainWindow::removeConnection(Arrow* arrow) {
+// функция удаления стрелки из логического графа
+void MainWindow::removeArrow(Arrow* arrow) {
     if (!arrowToIds.contains(arrow))
         return;
     auto conn = arrowToIds[arrow];
@@ -169,12 +171,13 @@ void MainWindow::removeConnection(Arrow* arrow) {
     arrowToIds.remove(arrow);
 }
 
+// функция проверки на циклы после создания стрелки
 void MainWindow::onArrowCreated(Arrow* arrow) {
     arrow->setZValue(-1000);
-    addConnection(arrow);
+    addArrow(arrow);
     if (!graph.isDAG()) {
         QMessageBox::warning(this, "Ошибка", "Эта связь создаст цикл в графе!");
-        removeConnection(arrow);
+        removeArrow(arrow);
         arrow->startItem()->removeArrow(arrow);
         arrow->endItem()->removeArrow(arrow);
         scene->removeItem(arrow);
@@ -183,11 +186,12 @@ void MainWindow::onArrowCreated(Arrow* arrow) {
     updateExecuteButton();
 }
 
+// функция удаления объекта сцены
 void MainWindow::deleteItem() {
     QList<QGraphicsItem*> selected = scene->selectedItems();
     for (QGraphicsItem* item : selected) {
         if (Arrow* arrow = qgraphicsitem_cast<Arrow*>(item)) {
-            removeConnection(arrow);
+            removeArrow(arrow);
             if (arrow->startItem())
                 arrow->startItem()->removeArrow(arrow);
             if (arrow->endItem())
@@ -196,7 +200,7 @@ void MainWindow::deleteItem() {
             delete arrow;
         } else if (VisualNode* node = qgraphicsitem_cast<VisualNode*>(item)) {
             for (Arrow* arrow : node->getArrows()) {
-                removeConnection(arrow);
+                removeArrow(arrow);
                 scene->removeItem(arrow);
                 delete arrow;
             }
@@ -208,12 +212,15 @@ void MainWindow::deleteItem() {
     updateExecuteButton();
 }
 
+// функция запуска вычислений графа
 void MainWindow::executeGraph() {
     for (QGraphicsItem* item : scene->items()) {
         if (VisualNode* node = qgraphicsitem_cast<VisualNode*>(item)) {
-            if (!graph.findNodeById(node->getNodeId())) addNode(node);
+            if (!graph.findNodeById(node->getNodeId()))
+                addNode(node);
         } else if (Arrow* arrow = qgraphicsitem_cast<Arrow*>(item)) {
-            if (!arrowToIds.contains(arrow)) addConnection(arrow);
+            if (!arrowToIds.contains(arrow))
+                addArrow(arrow);
         }
     }
 
@@ -289,6 +296,7 @@ void MainWindow::executeGraph() {
     QMessageBox::information(this, "Выполнение", "Граф успешно выполнен!");
 }
 
+//  функция обновления состояния кнопки "Выполнить"
 void MainWindow::updateExecuteButton() {
     QPushButton* execBtn = findChild<QPushButton*>("executeButton");
     if (!execBtn) return;
@@ -308,50 +316,4 @@ void MainWindow::updateExecuteButton() {
     }
 
     execBtn->setEnabled(hasOutput && hasConnectionToOutput);
-}
-
-void MainWindow::showInstruction() {
-    QString fileName = "instruction.txt";
-    QFile file(fileName);
-
-    if (!file.exists()) {
-        QMessageBox::warning(this, "Ошибка",
-            "Файл instruction.txt не найден!\n"
-            "Убедитесь, что файл находится в папке с программой.");
-        return;
-    }
-
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::warning(this, "Ошибка", "Не удалось открыть файл инструкции!");
-        return;
-    }
-
-    QByteArray data = file.readAll();
-    file.close();
-
-    if (data.size() >= 3 && data[0] == '\xEF' && data[1] == '\xBB' && data[2] == '\xBF') {
-        data = data.mid(3);
-    }
-
-    QString content = QString::fromUtf8(data);
-
-    QDialog* dialog = new QDialog(this);
-    dialog->setAttribute(Qt::WA_DeleteOnClose);
-    dialog->setWindowTitle("Инструкция");
-    dialog->resize(600, 500);
-
-    QVBoxLayout* layout = new QVBoxLayout(dialog);
-
-    QTextEdit* textEdit = new QTextEdit();
-    textEdit->setReadOnly(true);
-    textEdit->setPlainText(content);
-    textEdit->setFont(QFont("Consolas", 11));
-    layout->addWidget(textEdit);
-
-    QPushButton* closeButton = new QPushButton("Закрыть");
-    layout->addWidget(closeButton);
-
-    QObject::connect(closeButton, &QPushButton::clicked, dialog, &QDialog::close);
-
-    dialog->show();
 }

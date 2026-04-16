@@ -17,7 +17,7 @@ protected:
     QRectF boundingRect() const override; // функция, задающая ограничения для стрелки
 
 private:
-    VisualNode* current_start;
-    VisualNode* current_end;
-    QPolygonF arrow_head;
+    VisualNode* current_start; // указатель на начальный узел
+    VisualNode* current_end; // указатель на конечный узел
+    QPolygonF arrow_head; // полигон для анконечника
 };

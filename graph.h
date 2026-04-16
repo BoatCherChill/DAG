@@ -1,5 +1,4 @@
-#ifndef GRAPH_H
-#define GRAPH_H
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -20,34 +19,34 @@ enum class NodeType { INPUT = 1, OUTPUT = 2, SUM = 3, MEDIAN = 4, AVERAGE = 5, T
 // Структура узла
 struct Node {
     int nodeID;
-    pair<int, int> coordinates;
-    NodeType type;
-    vector<int> prev_nodes;
-    string result;
-    bool calculated;
+    pair<int, int> coordinates; // кооржинаты узла на сцене
+    NodeType type; // тип узла
+    vector<int> prev_nodes; // список ID узлов предков
+    string result; // результат вычисления узла
+    bool calculated; // флаг проведения вычислений
     Node() : nodeID(0), type(NodeType::INPUT), calculated(false) {}
 };
 
 // Класс графа
 class Graph {
 private:
-    vector<Node> nodes;
-    int next_NodeID;
+    vector<Node> nodes; // список всех узлов графа
+    int next_NodeID; // следуюзий свободный ID
 
-    vector<vector<int>> adjacencyMatrix() const;
-    bool hasCycle(int v, vector<bool>& visited, vector<bool>& recStack) const;
+    vector<vector<int>> adjacencyMatrix() const; // функция постоения матрицы смежности
+    bool hasCycle(int v, vector<bool>& visited, vector<bool>& recStack) const; // функция проверки циклов от определенного узла
 
 public:
     Graph() : next_NodeID(0) {}
 
-    void addNode(int x, int y, NodeType type);
-    Node* findNodeById(int id);
-    void deleteNode(int id);
-    void addRelation(int fromId, int toId);
-    void deleteRelation(int fromId, int toId);
-    bool isDAG() const;
-    vector<int> topologicalSort();
-    void execute();
+    void addNode(int x, int y, NodeType type); // функция добавления узла
+    Node* findNodeById(int id); // функция поиска узла по ID
+    void deleteNode(int id); // функция удаления узла
+    void addRelation(int fromId, int toId); // функция добавления связи между узлами
+    void deleteRelation(int fromId, int toId); // функция удаления связи между узлами
+    bool isDAG() const; // функция проверки графа на ацикличность
+    vector<int> topologicalSort(); // функция топологической сортировки
+    void execute(); // функция вычисления графа
     int getNextId() const { return next_NodeID; }
 
     // Операции
@@ -57,5 +56,3 @@ public:
     string toUpper(const string& data) const;
     string toLower(const string& data) const;
 };
-
-#endif

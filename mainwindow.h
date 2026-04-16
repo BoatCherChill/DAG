@@ -13,34 +13,32 @@ class Arrow;
 class MainWindow : public QMainWindow {
     Q_OBJECT
 public:
-    MainWindow();
-    ~MainWindow();
+    MainWindow(); // конструктор главного кона
+    ~MainWindow(); // деструктор главного окна
 
 private slots:
-    void showContextMenu(const QPoint& pos);
-    void createNode(NodeType type);
-    void deleteItem();
-    void executeGraph();
-    void onArrowCreated(Arrow* arrow);
+    void showContextMenu(const QPoint& pos); // контекстное меню
+    void createNode(NodeType type); // функция создания узла на сцене
+    void deleteItem(); // функция удаления объекта
+    void executeGraph(); // функция запуска вычисления графа
+    void onArrowCreated(Arrow* arrow); // функция проверки на циклы после создания стрелки
 
 private:
-    void setupUI();
-    void createToolbar();
-    void addNode(VisualNode* node);
-    void removeNode(VisualNode* node);
-    void addConnection(Arrow* arrow);
-    void removeConnection(Arrow* arrow);
-    void updateExecuteButton();
-    bool isGraphAcyclic();
-    void showInstruction();
+    void setupUI(); // функция настройки пользовательсткого интерфейса
+    void createToolbar(); // функция создания панели инструментов
+    void addNode(VisualNode* node); // функция добавления узла в логический граф
+    void removeNode(VisualNode* node); // функция улаления узла со сцены
+    void addArrow(Arrow* arrow); // функция добавления стрелки на сцену
+    void removeArrow(Arrow* arrow); // функция удаления стрелки со сцены
+    void updateExecuteButton(); // функция обновления состояния кнопки "Выполнить"
 
-    DiagramScene* scene;
-    QGraphicsView* view;
-    QPointF menu_pos;
-    Graph graph;
-    QMap<int, VisualNode*> idToNode;
-    QMap<Arrow*, QPair<int, int>> arrowToIds;
+    DiagramScene* scene;  // графическая сцена
+    QGraphicsView* view; // виджет для отоюражения сцены
+    QPointF menu_pos; // позиция создания узла
+    Graph graph; // граф
+    QMap<int, VisualNode*> idToNode; //словарь ID-узел
+    QMap<Arrow*, QPair<int, int>> arrowToIds; //словарь стрелка-(координаты концов)
 
-    QToolButton* node_button;
-    QToolButton* arrow_button;
+    QToolButton* node_button; // кнопка "Узлы"
+    QToolButton* arrow_button; // кнопка "Связи"
 };
