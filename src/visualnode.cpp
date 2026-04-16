@@ -198,6 +198,8 @@ bool VisualNode::isCompatibleWith(VisualNode* other) const {
 
 void VisualNode::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
     if (nodeType == NodeType::INPUT) {
+
+        bool hasConnections = !arrows.isEmpty();
         QDialog dialog;
         dialog.setWindowTitle("Ввод данных");
         dialog.setMinimumWidth(450);
@@ -214,6 +216,13 @@ void VisualNode::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
             typeCombo->setCurrentIndex(1);
         else
             typeCombo->setCurrentIndex(0);
+
+        if (hasConnections) {
+           typeCombo->setEnabled(false);
+           QLabel* warningLabel = new QLabel("Изменение типа недоступно, пока есть связи");
+           warningLabel->setStyleSheet("color: grey; font-size: 10px;");
+           layout->addWidget(warningLabel);
+        }
 
         layout->addWidget(typeCombo);
 
