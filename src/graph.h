@@ -1,20 +1,26 @@
 #pragma once
 
-#include <iostream>
 #include <string>
 #include <vector>
 #include <algorithm>
 #include <sstream>
 #include <map>
 #include <queue>
-#include <cctype>
 #include <QString>
 #include <QStringList>
 
 using namespace std;
 
 // Типы узлов
-enum class NodeType { INPUT = 1, OUTPUT = 2, SUM = 3, MEDIAN = 4, AVERAGE = 5, TO_UPPER = 6, TO_LOWER = 7 };
+enum class NodeType {
+    INPUT = 1,
+    OUTPUT = 2,
+    SUM = 3,
+    MEDIAN = 4,
+    AVERAGE = 5,
+    TO_UPPER = 6,
+    TO_LOWER = 7
+};
 
 // Структура узла
 struct Node {
@@ -31,7 +37,7 @@ struct Node {
 class Graph {
 private:
     vector<Node> nodes; // список всех узлов графа
-    int next_NodeID; // следуюзий свободный ID
+    int next_NodeID; // следующий свободный ID
 
     vector<vector<int>> adjacencyMatrix() const; // функция постоения матрицы смежности
     bool hasCycle(int v, vector<bool>& visited, vector<bool>& recStack) const; // функция проверки циклов от определенного узла

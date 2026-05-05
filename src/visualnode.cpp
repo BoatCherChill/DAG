@@ -59,19 +59,6 @@ QString VisualNode::normalizeDataString(const QString& data) const {
     return result;
 }
 
-QList<double> VisualNode::extractNumbers(const QString& data) const {
-    QList<double> numbers;
-    QString normalized = normalizeDataString(data);
-    QStringList parts = normalized.split(' ', Qt::SkipEmptyParts);
-    for (const QString& part : parts) {
-        bool ok;
-        double num = part.toDouble(&ok);
-        if (ok)
-            numbers.append(num);
-    }
-    return numbers;
-}
-
 bool VisualNode::validateNumberData(const QString& data) {
     QString normalized = normalizeDataString(data);
     QStringList parts = normalized.split(' ', Qt::SkipEmptyParts);
@@ -87,7 +74,6 @@ bool VisualNode::validateNumberData(const QString& data) {
 
 void VisualNode::setInputData(const QString& data) {
     inputData = data;
-    inputDataRaw = data;
     calculated = true;
     update();
 }
@@ -95,7 +81,6 @@ void VisualNode::setInputData(const QString& data) {
 void VisualNode::setResult(double val) {
     value = val;
     inputData = QString::number(val);
-    inputDataRaw = inputData;
     calculated = true;
     update();
 }
@@ -108,22 +93,17 @@ void VisualNode::addOutputData(const QString& data) {
     update();
 }
 
-void VisualNode::clearOutputData() {
-    if (nodeType != NodeType::OUTPUT) return;
-    outputDataList.clear();
-    calculated = false;
-    value = 0;
-    update();
-}
-
 void VisualNode::showOutputDialog() {
-    if (nodeType != NodeType::OUTPUT) return;
-    if (outputDialogOpen) return;
+    if (nodeType != NodeType::OUTPUT)
+        return;
+    if (outputDialogOpen)
+        return;
 
     QDialog* dialog = new QDialog();
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->setWindowTitle("Результат");
     dialog->setMinimumSize(400, 300);
+    dialog->setModal(true);
 
     QVBoxLayout* layout = new QVBoxLayout(dialog);
 
@@ -141,7 +121,7 @@ void VisualNode::showOutputDialog() {
     });
 
     outputDialogOpen = true;
-    dialog->show();
+    dialog->exec();
 }
 
 
@@ -230,7 +210,7 @@ void VisualNode::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
         layout->addWidget(label);
 
         QTextEdit* edit = new QTextEdit;
-        edit->setPlainText(inputDataRaw.isEmpty() ? inputData : inputDataRaw);
+        edit->setPlainText(inputData);
         edit->setMinimumHeight(120);
         layout->addWidget(edit);
 
@@ -351,4 +331,13 @@ QVariant VisualNode::itemChange(GraphicsItemChange change, const QVariant& value
             arrow->updatePosition();
     }
     return QGraphicsEllipseItem::itemChange(change, value);
+}
+
+
+void VisualNode::cleanResults(){
+    inputData.clear();
+    outputDataList.clear();
+    calculated = false;
+    value = 0;
+    update();
 }

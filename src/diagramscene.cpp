@@ -1,12 +1,13 @@
 #include "diagramscene.h"
 #include "visualnode.h"
 #include "arrow.h"
+#include "graph.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QMessageBox>
 
 //конструктор сцены
-DiagramScene::DiagramScene(QMenu* itemMenu, QObject* parent)
-    : QGraphicsScene(parent), my_menu(itemMenu) {}
+DiagramScene::DiagramScene(QObject* parent)
+    : QGraphicsScene(parent) {}
 
 
 // функция установки режима работы сцены
@@ -65,19 +66,19 @@ void DiagramScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 
             // Запрет на стрелки в узел Input
             if (end && end->getNodeType() == NodeType::INPUT) {
-                QMessageBox::warning(nullptr, "Ошибка", "Нельзя создавать связи в узел Input!");
+                QMessageBox::warning(nullptr, "Ошибка", "Нельзя создавать стрелки в узел Input!");
                 return;
             }
 
             // Запрет стрелки из узла Output
             if (start && start->getNodeType() == NodeType::OUTPUT) {
-                QMessageBox::warning(nullptr, "Ошибка", "Нельзя создавать связи из узла Output!");
+                QMessageBox::warning(nullptr, "Ошибка", "Нельзя создавать стрелки из узла Output!");
                 return;
             }
 
             // Запрет нескольких стрелок к узлу Output
             if (end && end->getNodeType() == NodeType::OUTPUT && !end->getArrows().isEmpty()) {
-                QMessageBox::warning(nullptr, "Ошибка", "У узла Output может быть только одна связь!");
+                QMessageBox::warning(nullptr, "Ошибка", "У узла Output может быть только одна стрелка!");
                 return;
             }
 

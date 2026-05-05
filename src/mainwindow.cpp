@@ -5,7 +5,6 @@
 #include "arrow.h"
 #include <QtWidgets>
 #include <QButtonGroup>
-#include <QToolButton>
 
 // конструктор окна приложения
 MainWindow::MainWindow() {
@@ -17,23 +16,15 @@ MainWindow::MainWindow() {
 
 // деструктор окна приложения
 MainWindow::~MainWindow() {
-    QList<QWidget*> topWidgets = QApplication::topLevelWidgets();
-    for (QWidget* widget : topWidgets) {
-        if (widget != this && widget->isVisible()) {
-            widget->close();
-        }
-    }
 }
 
 // функция настройки интерфейса
 void MainWindow::setupUI() {
-    QMenu* itemMenu = new QMenu(this);
-    scene = new DiagramScene(itemMenu, this);
+    scene = new DiagramScene(this);
     scene->setSceneRect(-5000, -5000, 10000, 10000);
     scene->setBackgroundBrush(Qt::white);
     scene->setMode(DiagramScene::InsertNode);
 
-    QObject::connect(scene, &DiagramScene::itemInserted, this, &MainWindow::addNode);
     QObject::connect(scene, &DiagramScene::arrowCreated, this, &MainWindow::onArrowCreated);
     view = new QGraphicsView(scene, this);
     view->setRenderHint(QPainter::Antialiasing);
@@ -189,29 +180,62 @@ void MainWindow::onArrowCreated(Arrow* arrow) {
 // функция удаления объекта сцены
 void MainWindow::deleteItem() {
     QList<QGraphicsItem*> selected = scene->selectedItems();
+
+    // Сначала собираем все узлы и стрелки, которые нужно удалить
+    QList<VisualNode*> nodesToDelete;
+    QList<Arrow*> arrowsToDelete;
+
     for (QGraphicsItem* item : selected) {
         if (Arrow* arrow = qgraphicsitem_cast<Arrow*>(item)) {
-            removeArrow(arrow);
-            if (arrow->startItem())
-                arrow->startItem()->removeArrow(arrow);
-            if (arrow->endItem())
-                arrow->endItem()->removeArrow(arrow);
-            scene->removeItem(arrow);
-            delete arrow;
+            arrowsToDelete.append(arrow);
         } else if (VisualNode* node = qgraphicsitem_cast<VisualNode*>(item)) {
-            for (Arrow* arrow : node->getArrows()) {
-                removeArrow(arrow);
-                scene->removeItem(arrow);
-                delete arrow;
-            }
-            removeNode(node);
-            scene->removeItem(node);
-            delete node;
+            nodesToDelete.append(node);
         }
     }
+
+    // Удаляем все стрелки, связанные с удаляемыми узлами
+    for (VisualNode* node : nodesToDelete) {
+        for (Arrow* arrow : node->getArrows()) {
+            if (!arrowsToDelete.contains(arrow))
+                arrowsToDelete.append(arrow);
+        }
+    }
+
+    // Удаляем стрелки из логического графа и со сцены
+    for (Arrow* arrow : arrowsToDelete) {
+        // Удаляем из логического графа
+        if (arrowToIds.contains(arrow)) {
+            graph.deleteRelation(arrowToIds[arrow].first, arrowToIds[arrow].second);
+            arrowToIds.remove(arrow);
+        }
+
+        // Удаляем из визуальных узлов
+        if (arrow->startItem())
+            arrow->startItem()->removeArrow(arrow);
+        if (arrow->endItem())
+            arrow->endItem()->removeArrow(arrow);
+
+        // Удаляем со сцены
+        scene->removeItem(arrow);
+        delete arrow;
+    }
+
+    // Удаляем узлы из логического графа и со сцены
+    for (VisualNode* node : nodesToDelete) {
+        // Удаляем из логического графа (это также очистит все связи)
+        int nodeId = node->getNodeId();
+        if (nodeId != 0) {
+            graph.deleteNode(nodeId);
+            idToNode.remove(nodeId);
+        }
+
+        // Удаляем со сцены
+        scene->removeItem(node);
+        delete node;
+    }
+
     updateExecuteButton();
 }
-
 // функция запуска вычислений графа
 void MainWindow::executeGraph() {
     for (QGraphicsItem* item : scene->items()) {
@@ -224,11 +248,20 @@ void MainWindow::executeGraph() {
         }
     }
 
+
+
     QMap<int, QString> savedInputData;
     for (auto it = idToNode.begin(); it != idToNode.end(); ++it) {
         VisualNode* visNode = it.value();
         if (visNode->getNodeType() == NodeType::INPUT && visNode->isCalculated()) {
             savedInputData[it.key()] = visNode->getInputData();
+        }
+    }
+
+    for (QGraphicsItem* item : scene->items()){
+        if (VisualNode* node = qgraphicsitem_cast<VisualNode*>(item)){
+            if (node->getNodeType() != NodeType::INPUT)
+                node->cleanResults();
         }
     }
 
@@ -238,12 +271,6 @@ void MainWindow::executeGraph() {
         if (graphNode && visNode->getNodeType() == NodeType::INPUT && visNode->isCalculated()) {
             graphNode->result = visNode->getInputData().toStdString();
             graphNode->calculated = true;
-        }
-    }
-
-    for (auto it = idToNode.begin(); it != idToNode.end(); ++it) {
-        if (it.value()->getNodeType() == NodeType::OUTPUT) {
-            it.value()->clearOutputData();
         }
     }
 

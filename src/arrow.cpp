@@ -58,7 +58,7 @@ void Arrow::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) 
     QPointF arrow_left = end_point - QPointF(dirX * arrow_size - perpX * arrow_size/2, dirY * arrow_size - perpY * arrow_size/2);
     QPointF arrow_right = end_point - QPointF(dirX * arrow_size + perpX * arrow_size/2, dirY * arrow_size + perpY * arrow_size/2);
 
-    arrow_head.clear();
+    QPolygonF arrow_head;
     arrow_head << end_point << arrow_left << arrow_right;
     painter->drawPolygon(arrow_head);
 

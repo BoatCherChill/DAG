@@ -19,5 +19,4 @@ protected:
 private:
     VisualNode* current_start; // указатель на начальный узел
     VisualNode* current_end; // указатель на конечный узел
-    QPolygonF arrow_head; // полигон для анконечника
 };

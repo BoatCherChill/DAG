@@ -106,12 +106,22 @@ Node* Graph::findNodeById(int id) {
 
 // функция удаления узла
 void Graph::deleteNode(int id) {
-    // Удаляем узел из списка
-    nodes.erase(remove_if(nodes.begin(), nodes.end(), [id](const Node& n) { return n.nodeID == id; }), nodes.end());
-    // Удаляем все ссылки на удаленный узел из списков prevNodes
+    // Удалить все связи, где узел является предком
     for (auto& node : nodes) {
-        node.prev_nodes.erase(remove(node.prev_nodes.begin(), node.prev_nodes.end(), id), node.prev_nodes.end());
+        if (node.nodeID != id) {
+            node.prev_nodes.erase(
+                std::remove(node.prev_nodes.begin(), node.prev_nodes.end(), id),
+                node.prev_nodes.end()
+            );
+        }
     }
+
+    // Удалить узел
+    nodes.erase(
+        std::remove_if(nodes.begin(), nodes.end(),
+            [id](const Node& n) { return n.nodeID == id; }),
+        nodes.end()
+    );
 }
 
 // функция добавления связи
@@ -230,7 +240,8 @@ void Graph::execute() {
         for (int prevId : node->prev_nodes) {
             Node* prev = findNodeById(prevId);
             if (prev && prev->calculated) {
-                if (!allData.empty()) allData += " ";
+                if (!allData.empty())
+                    allData += " ";
                 allData += prev->result;
             }
         }
