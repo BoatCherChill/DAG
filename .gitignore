@@ -7,7 +7,7 @@ CMakeLists.txt.user*
 *.includes
 *.config
 
-# Qt временные файлы сборки (НЕ удаляем build, только временные файлы внутри)
+# Qt временные файлы сборки 
 *_autogen/
 mocs_compilation.cpp
 *.moc
@@ -18,7 +18,7 @@ Makefile*
 *.pri.user
 *.pro.user
 
-# CMake временные файлы (НЕ удаляем build, только временные файлы)
+# CMake временные файлы
 CMakeCache.txt
 CMakeUserPresets.json
 CMakePresets.json
@@ -37,7 +37,7 @@ CTestTestfile.cmake
 *~
 *.bak
 
-# Debug/Release папки (если они отдельные)
+# Debug/Release папки 
 Debug/
 Release/
 *.Debug
@@ -54,7 +54,7 @@ Thumbs.db
 desktop.ini
 $RECYCLE.BIN/
 
-# Компиляторы и линковщики (временные файлы)
+# Компиляторы и линковщики 
 *.exp
 *.ilk
 *.pdb
@@ -64,14 +64,14 @@ $RECYCLE.BIN/
 *.iobj
 *.ipch
 
-# Архивы (если случайно)
+# Архивы 
 *.zip
 *.7z
 *.rar
 *.tar
 *.gz
 
-# Документация (если генерируется)
+# Документация 
 html/
 latex/
 *.qch
