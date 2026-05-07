@@ -101,12 +101,20 @@ MainWindow (контроллер)
 ## Структура проекта
 ```
 DAG/
-- CMakeLists.txt      # Файл сборки
-- main.cpp            # Точка входа
-- mainwindow.h/cpp    # Главное окно
-- diagramscene.h/cpp  # Графическая сцена
-- visualnode.h/cpp    # Визуальный узел
-- arrow.h/cpp         # Стрелка
-- graph.h/cpp         # Логика графа
-- README.md           # Документация
+├── CMakeLists.txt
+├── README.md
+├── src/
+│   ├── main.cpp
+│   ├── mainwindow.h
+│   ├── mainwindow.cpp
+│   ├── diagramscene.h
+│   ├── diagramscene.cpp
+│   ├── visualnode.h
+│   ├── visualnode.cpp
+│   ├── arrow.h
+│   ├── arrow.cpp
+│   ├── graph.h
+│   └── graph.cpp
+└── images/
+    └── *.png
 ```
